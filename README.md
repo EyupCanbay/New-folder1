@@ -53,8 +53,8 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
-    cd pet-adoption-platform
+    https://github.com/EyupCanbay/Pet-Adoption-Platform.git
+    cd Pet-Adoption-Platform
     ```
 2.  **Install dependencies**:
     ```bash
@@ -64,7 +64,7 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     Create a `.env` file in the root directory and add the necessary environment variables (e.g., `DB_URI`, `JWT_SECRET`, `PYTHON_URI`, Cloudinary credentials).
     ```env
     NODE_ENV=development
-    DB_URI=mongodb://localhost:27017/pet_adoption_platform
+    DB_URI=your_mongodb__url
     JWT_SECRET=your_very_secret_jwt_key
     PYTHON_URI=/path/to/your/python_executable # e.g., /usr/bin/python3 or path/to/venv/bin/python
     CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
@@ -79,7 +79,7 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     ```bash
     npm start
     ```
-    The server will typically start on `http://localhost:PORT` (port is usually defined in `bin/www` or via an environment variable, commonly 3000 or 8000).
+    The server will start on `http://localhost:5000`
 
 ## API Endpoints
 
