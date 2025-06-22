@@ -65,7 +65,7 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     JWT_SECRET=your_very_secret_jwt_key
     PYTHON_URI=/path/to/your/python_executable # e.g., /usr/bin/python3 or path/to/venv/bin/python
     ```
-    *Note: The sentiment analysis model (`sentiment_model.h5`), `tokenizer.json`, and `label_map.json` are expected to be in a directory `sensement_analys` relative to the `sentimentAnalyzer.js` file's parent directory (i.e., `pet-adoption-platform/sensement_analys/`).*
+    *Note: The sentiment analysis model (`sentiment_model.h5`), `tokenizer.json`, and `label_map.json` are expected to be in a directory `sensement_analys` relative to the `sentimentAnalyzer.js` file's parent directory (i.e., `pet-adoption-platform/sensement_analys/`). Ensure the `image_detector` Python script has access to `yolov5m_best.pt`.*
 
 4.  **Ensure MongoDB is running.**
 
@@ -143,11 +143,11 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     *   Controller: `reportController.reportUser`
 *   **`GET /users/report/admin`**
     *   Description: (Admin only) Retrieves all user reports.
-    *   Middleware: `checkUser`, `checkRole(['ADMIN'])`. (Note: `checkRole` is defined but not present in the route chain for this specific endpoint in `users_routes.js`. It should be `checkUser, checkRole(['ADMIN'])` for proper admin access.) The `reportController.getAllReport` suggests admin access.
+    *   Middleware: `checkUser`, `checkRole(['ADMIN'])`.
     *   Controller: `reportController.getAllReport`
 *   **`PUT /users/report/admin/:user_id`**
     *   Description: (Admin only) Bans a user for a specified duration.
-    *   Middleware: `checkUser`, `checkRole(['ADMIN'])`. (Note: `checkRole` is defined but not present in the route chain for this specific endpoint in `users_routes.js`. It should be `checkUser, checkRole(['ADMIN'])` for proper admin access.) The `reportController.forbiddenUser` suggests admin access.
+    *   Middleware: `checkUser`, `checkRole(['ADMIN'])`.
     *   Controller: `reportController.forbiddenUser`
 
 ### Categories (`/category`)
@@ -157,17 +157,17 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     *   Controller: `categoryController.getCategories`
 *   **`POST /category`**
     *   Description: (Admin authenticated) Creates a new pet category.
-    *   Middleware: `checkUser`, `validateCategory`. (Note: `validateCategory` also checks `req.user` suggesting admin/logged-in user. `checkRole(['ADMIN'])` might be intended).
+    *   Middleware: `checkUser`, `validateCategory`.
     *   Controller: `categoryController.createCategory`
 *   **`PUT /category/:category_id`**
-    *   Description: Updates an existing pet category. (Admin access implied by typical CRUD patterns).
+    *   Description: Updates an existing pet category. (Admin access implied).
     *   Controller: `categoryController.updateCategory`
 *   **`DELETE /category/:category_id`**
     *   Description: Deletes a pet category. (Admin access implied).
     *   Controller: `categoryController.deleteCategory`
 *   **`POST /category/:category_id/subcategory`**
     *   Description: (Admin authenticated) Creates a new subcategory (breed) under a specific category.
-    *   Middleware: `checkUser`. (Note: `validateSubCategory` might be intended here, also implies logged-in user/admin).
+    *   Middleware: `checkUser`, `validateSubCategory`.
     *   Controller: `categoryController.createSubcategory`
 
 ### Subcategories (`/subcategory`)
@@ -188,9 +188,9 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
 ### Pet Listings (for Adoption) (`/listing`)
 
 *   **`POST /listing`**
-    *   Description: Creates a new pet listing for adoption. (Function name in controller `createLostListing` is a misnomer, it uses `PetListing` model).
-    *   Middleware: `checkUser`, `validatePetListing`.
-    *   Controller: `petListingController.createLostListing` (should be `createPetListing`)
+    *   Description: Creates a new pet listing for adoption.
+    *   Middleware: `checkUser`, `imageValidator`, `uploadToCloudinary`, `validatePetListing`.
+    *   Controller: `petListingController.createLostListing` (This function name appears to be a misnomer based on the model used).
 *   **`GET /listing`**
     *   Description: Retrieves all pet listings for adoption with pagination.
     *   Controller: `petListingController.getAllPetListing`
@@ -222,7 +222,7 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     *   Controller: `petListingCommentController.deletePetListingComment`
 *   **`PUT /listing/:listing_id/comment/:comment_id`**
     *   Description: Updates a comment on a pet listing. User must be comment owner, listing owner, or admin.
-    *   Middleware: `checkUser`, `sentimentAnalyzerMiddleware` (implicitly, as content is in `req.body`).
+    *   Middleware: `checkUser`.
     *   Controller: `petListingCommentController.updatePetListingComment`
 *   **`POST /listing/:listing_id/comment/:comment_id/reply_comment`**
     *   Description: Adds a reply to a specific comment on a pet listing.
@@ -237,14 +237,14 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     *   Controller: `petListingCommentController.deleteSubComment`
 *   **`PUT /listing/:listing_id/comment/:comment_id/reply_comment/:reply_id`**
     *   Description: Updates a reply to a comment. User must be reply owner, main comment owner, listing owner, or admin.
-    *   Middleware: `checkUser`, `sentimentAnalyzerMiddleware` (implicitly).
+    *   Middleware: `checkUser`.
     *   Controller: `petListingCommentController.updatePetListingSubComment`
 
 ### Lost Pet Listings (`/lost_listing`)
 
 *   **`POST /lost_listing`**
     *   Description: Creates a new lost pet listing.
-    *   Middleware: `checkUser`, `validateLostPetListing`. (Note: `validateLostPetListing` is defined but not used in this route's middleware chain in the provided `lost_listing_routes.js`. It should be present).
+    *   Middleware: `checkUser`, `imageValidator`, `uploadToCloudinary`. (Note: `validateLostPetListing` is defined but not included in the middleware chain for this route).
     *   Controller: `listingController.createLostListing`
 *   **`GET /lost_listing`**
     *   Description: Retrieves all lost pet listings with pagination.
@@ -277,22 +277,22 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     *   Controller: `commentController.deleteComment`
 *   **`PUT /lost_listing/:listing_id/comment/:comment_id`**
     *   Description: Updates a comment on a lost pet listing. User must be comment owner, listing owner, or admin.
-    *   Middleware: `checkUser`, `sentimentAnalyzerMiddleware` (implicitly).
-    *   Controller: `commentController.updateLostListingComment` (Assumed, file has `updateLostListingSubComment` which is incorrect for this path).
-*   **`POST /lost_listing/:listing_id/comment/:comment_id/reply_comment`** (Path in file has typo `lisitng_id`)
+    *   Middleware: `checkUser`.
+    *   Controller: `commentController.updateLostListingComment`
+*   **`POST /lost_listing/:listing_id/comment/:comment_id/reply_comment`**
     *   Description: Adds a reply to a specific comment on a lost pet listing.
     *   Middleware: `checkUser`, `sentimentAnalyzerMiddleware`.
     *   Controller: `commentController.createReplyComment`
-*   **`GET /lost_listing/:listing_id/comment/:comment_id/reply_comment`** (Path in file has typo `lisitng_id`)
+*   **`GET /lost_listing/:listing_id/comment/:comment_id/reply_comment`**
     *   Description: Retrieves all replies for a specific comment on a lost pet listing.
     *   Controller: `commentController.getAllSubComments`
-*   **`DELETE /lost_listing/:listing_id/comment/:comment_id/reply_comment/:reply_id`** (Path in file has typo `lisitng_id`)
+*   **`DELETE /lost_listing/:listing_id/comment/:comment_id/reply_comment/:reply_id`**
     *   Description: Deletes a reply to a comment. User must be reply owner, main comment owner, listing owner, or admin.
     *   Middleware: `checkUser`.
     *   Controller: `commentController.deleteSubComment`
-*   **`PUT /lost_listing/:listing_id/comment/:comment_id/reply_comment/:reply_id`** (Path in file has typo `lisitng_id`, and method is `DELETE` calling `updateLostListingComment` which is incorrect. Assuming `PUT` and correct controller `updateLostListingSubComment`).
+*   **`PUT /lost_listing/:listing_id/comment/:comment_id/reply_comment/:reply_id`**
     *   Description: Updates a reply to a comment. User must be reply owner, main comment owner, listing owner, or admin.
-    *   Middleware: `checkUser`, `sentimentAnalyzerMiddleware` (implicitly).
+    *   Middleware: `checkUser`.
     *   Controller: `commentController.updateLostListingSubComment`
 
 ### Admin (`/admin`)
@@ -343,6 +343,22 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     *   Label `1`: IBAN/payment related phrases.
     *   Label `0`: General money-related phrases.
     *   Label `-1`: Normal, acceptable pet-related conversation.
+
+## Image Validation
+
+*   **Mechanism**: A Python script (`image_detector/detect.py`) utilizing YOLOv5 is used for image validation.
+*   **Integration**: The `imageValidator` middleware (`middleware/image_detector.js`) invokes this Python script.
+*   **Purpose**: To verify if an uploaded image contains an animal and no humans.
+*   **Action**:
+    *   If the image contains a human (`HUMAN_CLASS_NAME`), the request is rejected with a `400 Bad Request` (`detecting invalid frame`).
+    *   If the image contains an animal (`ANIMAL_CLASS_NAME`), the request proceeds to the next middleware.
+    *   If no animal is found or an error occurs during detection, the request is rejected with a `400 Bad Request` (`do not found animal in frame` or `an error occurred during image verification`).
+
+## Cloudinary Image Upload
+
+*   **Mechanism**: Images are uploaded to Cloudinary using the `uploadToCloudinary` middleware (`middleware/upload_to_cloudinary.js`).
+*   **Purpose**: Stores uploaded images in a cloud-based storage solution for better scalability and accessibility.
+*   **Process**: After successful upload, the temporary local file is deleted.
 
 ## Database Schema Overview
 
