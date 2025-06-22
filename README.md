@@ -14,7 +14,6 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
 *   **Interaction**:
     *   Comment on listings.
     *   Reply to comments.
-    *   Sentiment analysis on comments to prevent discussions about IBAN/money.
 *   **User Actions**:
     *   Bookmark favorite listings.
     *   Block other users.
