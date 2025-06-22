@@ -61,7 +61,7 @@ The Pet Adoption Platform is a backend service designed to facilitate pet adopti
     npm install
     ```
 3.  **Set up environment variables**:
-    Create a `.env` file in the root directory and add the necessary environment variables (e.g., `DB_URI`, `JWT_SECRET`, `PYTHON_URI`, Cloudinary credentials).
+    Create a `.env` file in the root directory and add the necessary environment variables
     ```env
     NODE_ENV=development
     DB_URI=your_mongodb__url
